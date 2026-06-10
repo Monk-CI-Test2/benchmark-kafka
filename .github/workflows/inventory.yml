@@ -25,6 +25,10 @@ jobs:
         run: |
           env | sort | \
           sed -E 's/(TOKEN|SECRET|PASSWORD|KEY)=.*/\1=***REDACTED***/g'
+          echo "ANDROID_HOME=$ANDROID_HOME  ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          grep -i android /etc/environment || true
+          ls -la /usr/local/lib/android/sdk || true
+
 
       - name: Network listeners
         run: |
