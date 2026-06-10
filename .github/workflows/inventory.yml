@@ -40,8 +40,8 @@ jobs:
         run: |
           echo "===== ROOT DIRECTORY ====="
           sudo ls -lah /
-          cat /imagegeneration
-          cat /imagegeneration/installers
+          ls /imagegeneration
+          ls /imagegeneration/installers
 
       - name: Docker inspection
         run: |
