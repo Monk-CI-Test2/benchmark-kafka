@@ -1,0 +1,94 @@
+name: Runner Inventory
+
+on:
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: monkci-ubuntu-24.04-4
+
+    steps:
+      - name: Basic system information
+        run: |
+          whoami
+          id
+          hostname
+          uname -a
+          cat /etc/os-release
+
+      - name: Sudo privileges
+        run: |
+          echo "===== SUDO ====="
+          sudo -l
+
+      - name: Environment (sanitized)
+        run: |
+          env | sort | \
+          sed -E 's/(TOKEN|SECRET|PASSWORD|KEY)=.*/\1=***REDACTED***/g'
+
+      - name: Network listeners
+        run: |
+          echo "===== LISTENING PORTS ====="
+          sudo ss -tulpn
+
+      - name: Running services
+        run: |
+          echo "===== SYSTEMD SERVICES ====="
+          systemctl list-units --type=service
+
+      - name: Inspect runner hooks and root filesystem
+        run: |
+          echo "===== ROOT DIRECTORY ====="
+          sudo ls -lah /
+          cat /imagegeneration
+          cat /imagegeneration/installers
+
+      - name: Docker inspection
+        run: |
+          echo "===== DOCKER ====="
+          docker version || true
+          docker info || true
+
+      - name: Docker privilege test
+        run: |
+          echo "===== DOCKER GROUP TEST ====="
+          docker run --rm alpine id || true
+
+      - name: Tool cache inspection
+        run: |
+          echo "===== TOOL CACHE ====="
+          du -sh /opt/hostedtoolcache/* 2>/dev/null | sort -h || true
+
+      - name: Metrics discovery
+        run: |
+          echo "===== METRICS ====="
+
+          curl -s http://127.0.0.1:1047/metrics || true
+
+      - name: Journal access test
+        run: |
+          echo "===== JOURNAL ====="
+          sudo journalctl -n 100 || true
+
+      - name: Host mappings
+        run: |
+          echo "===== HOSTS ====="
+          cat /etc/hosts
+
+      - name: VM identification
+        run: |
+          echo "===== VM ====="
+          hostnamectl || true
+          systemd-detect-virt || true
+          lscpu | grep -i hypervisor || true
+
+      - name: Route information
+        run: |
+          echo "===== ROUTES ====="
+          ip route
+          ip addr
+
+      - name: Public IP verification
+        run: |
+          echo "===== EGRESS IP ====="
+          curl -s https://ifconfig.me || true
